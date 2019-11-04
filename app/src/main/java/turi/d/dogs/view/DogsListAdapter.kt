@@ -3,10 +3,14 @@ package turi.d.dogs.view
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_dog.view.*
 import turi.d.dogs.R
 import turi.d.dogs.model.DogBreed
+import turi.d.dogs.util.getProgressDrawable
+import turi.d.dogs.util.loadImage
 
 class DogsListAdapter (val dogsList: ArrayList<DogBreed>): RecyclerView.Adapter<DogsListAdapter.DogViewHolder>( ) {
 
@@ -26,7 +30,10 @@ class DogsListAdapter (val dogsList: ArrayList<DogBreed>): RecyclerView.Adapter<
     override fun onBindViewHolder(holder: DogViewHolder, position: Int) {
         holder.view.name.text = dogsList[position].dogBreed
         holder.view.lifespan.text = dogsList[position].lifespan
-
+        holder.view.setOnClickListener{
+            Navigation.findNavController(it).navigate(ListFragmentDirections.actionDetailFragment())
+        }
+        holder.view.imageView.loadImage(dogsList[position].imageUrl, getProgressDrawable(holder.view.imageView.context))
     }
 
     class DogViewHolder(var view: View): RecyclerView.ViewHolder(view)
