@@ -3,7 +3,6 @@ package turi.d.dogs.viewmodel
 import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableSingleObserver
@@ -12,7 +11,9 @@ import kotlinx.coroutines.launch
 import turi.d.dogs.model.DogBreed
 import turi.d.dogs.model.DogDatabase
 import turi.d.dogs.model.DogsApiService
+import turi.d.dogs.util.NotificationsHelper
 import turi.d.dogs.util.SharedPreferencesHelper
+import java.lang.NumberFormatException
 
 class ListViewModel(application: Application) : BaseViewModel(application) {
     private var prefHelper = SharedPreferencesHelper(getApplication())
@@ -25,12 +26,26 @@ class ListViewModel(application: Application) : BaseViewModel(application) {
     val loading = MutableLiveData<Boolean>()
 
     fun refresh() {
+        checkCacheDuration()
         val updateTime = prefHelper.getUpdateTime()
         if (updateTime != null && updateTime != 0L && System.nanoTime() - updateTime < refreshTime) {
             fetchFromDatabase()
         } else {
             fetchFromRemote()
         }
+    }
+
+    private fun checkCacheDuration(){
+        val cachePreference = prefHelper.getCacheDuration()
+        try {
+            val cachePreferenceInt = cachePreference?.toInt() ?: 5 * 60
+            refreshTime = cachePreferenceInt.times( 1000 * 1000 * 1000L)
+        } catch (e: NumberFormatException){
+            e.printStackTrace()
+        }
+    }
+    fun refreshByPassCache(){
+        fetchFromRemote()
     }
 
     private fun fetchFromDatabase(){
@@ -52,6 +67,7 @@ class ListViewModel(application: Application) : BaseViewModel(application) {
                     override fun onSuccess(dogList: List<DogBreed>) {
                         storeDogsLocally(dogList)
                         Toast.makeText(getApplication(),"Dogs from our API  Endpoint", Toast.LENGTH_LONG).show()
+                        NotificationsHelper(getApplication()).createNotification()
                     }
 
                     override fun onError(e: Throwable) {

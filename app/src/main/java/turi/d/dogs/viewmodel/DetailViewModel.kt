@@ -1,13 +1,18 @@
 package turi.d.dogs.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.launch
 import turi.d.dogs.model.DogBreed
+import turi.d.dogs.model.DogDatabase
 
-class DetailViewModel: ViewModel() {
+class DetailViewModel(application: Application): BaseViewModel(application) {
     val dogLiveData = MutableLiveData<DogBreed>()
-    fun fetch(){
-        val dog = DogBreed("1", "Corgi", "15 years", "breedGroup", "bredFor", "temperament", "")
-        dogLiveData.value = dog
+    fun fetch(uuid: Int){
+        launch {
+            val dog = DogDatabase(getApplication()).dogDao().getDog(uuid)
+            dogLiveData.value = dog
+        }
     }
 }

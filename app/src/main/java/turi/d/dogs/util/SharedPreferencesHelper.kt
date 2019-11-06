@@ -3,7 +3,6 @@ package turi.d.dogs.util
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.view.ScaleGestureDetector
 import androidx.core.content.edit
 
 class SharedPreferencesHelper {
@@ -31,4 +30,5 @@ class SharedPreferencesHelper {
     }
 
     fun getUpdateTime() = prefs?.getLong(PREFS_TIME, 0)
+    fun getCacheDuration() = prefs?.getString("pref_cache_duration","")
 }
